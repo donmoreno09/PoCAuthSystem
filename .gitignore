@@ -1,0 +1,69 @@
+# --- Compilazione CMake / qmake ---
+.claude/
+build/
+install/
+cmake-build-*/
+Makefile
+CMakeFiles/
+CMakeCache.txt
+*.autosave
+*.user
+*.user.*
+
+# --- Qt Creator specific files ---
+*.pro.user*
+*.qbs.user*
+*.pro.user
+*.qmlproject.user
+*.creator.*
+*.creator
+
+# --- File temporanei ---
+*.o
+*.obj
+*.so
+*.a
+*.dll
+*.exe
+*.moc
+*.qrc.depends
+*.qrc.cpp
+*.ts~
+*.rej
+*.gch
+
+# --- Qt generated files ---
+moc_*
+ui_*
+qrc_*
+*.moc
+*.rcc
+
+# --- Logs / Backup / Editor files ---
+*.log
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+
+# --- OS / IDE Specific ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.iml
+App/assets/**/*.ini
+
+# --- QML cache / build ---
+.qmlcache/
+__pycache__/
+*.qmlc
+*.jsc
+
+# Optional: ignore compiled resource files if built
+resources.qrc.cpp
+
+# If you use Python tooling in QML dev
+.venv/
+env/
