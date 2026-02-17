@@ -12,6 +12,8 @@ class PermissionManager : public QObject
     QML_ELEMENT
     QML_SINGLETON
 
+    Q_PROPERTY(int revision READ revision NOTIFY permissionsChanged)
+
 public:
     explicit PermissionManager(QObject* parent = nullptr);
 
@@ -22,12 +24,15 @@ public:
     void loadFromSession(const QStringList& roles, const QStringList& permissions);
     void clear();
 
+    int revision() const { return m_revision; }
+
 signals:
     void permissionsChanged();
 
 private:
     QSet<QString> m_permissions;
     QSet<QString> m_roles;
+    int m_revision = 0;
 };
 
 #endif // PERMISSIONMANAGER_H

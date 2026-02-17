@@ -1,14 +1,15 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QDebug>
 
 #include "config.h"
 #include "networking/ApiEndpoints.h"
 #include "networking/HttpClient.h"
 #include "networking/AuthApi.h"
+#include "networking/ItemApi.h"
 #include "auth/AuthManager.h"
 #include "auth/PermissionManager.h"
 #include "auth/SecureTokenStorage.h"
+#include "models/ItemModel.h"
 
 int main(int argc, char *argv[])
 {
@@ -37,14 +38,21 @@ int main(int argc, char *argv[])
     auto* authApi        = new AuthApi(authHttpClient, &app);
     auto* tokenStorage   = new SecureTokenStorage(&app);
 
+    auto* itemHttpClient = new HttpClient(&app);
+    auto* itemApi        = new ItemApi(itemHttpClient, &app);
+
     auto* authManager = engine.singletonInstance<AuthManager*>("PoCAuthSystem", "AuthManager");
     auto* permManager = engine.singletonInstance<PermissionManager*>("PoCAuthSystem", "PermissionManager");
+    auto* itemModel   = engine.singletonInstance<ItemModel*>("PoCAuthSystem", "ItemModel");
 
     authManager->initialize(authApi, tokenStorage, permManager);
-    authManager->tryAutoLogin();
+    itemModel->initialize(itemApi);
 
-    qDebug() << "[Main] Auth service initialized";
-    qDebug() << "[Main] API base URL:" << ApiEndpoints::BaseUrl;
+    QObject::connect(authManager, &AuthManager::tokenChanged, itemHttpClient, &HttpClient::setBearerToken);
+    QObject::connect(authManager, &AuthManager::loginSucceeded, itemModel, &ItemModel::fetch);
+    QObject::connect(authManager, &AuthManager::loggedOut, itemHttpClient, &HttpClient::clearBearerToken);
+
+    authManager->tryAutoLogin();
 
     engine.loadFromModule("PoCAuthSystem", "Main");
 

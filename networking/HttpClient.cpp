@@ -9,13 +9,11 @@ HttpClient::HttpClient(QObject *parent)
     , m_rest(&m_nam, this)
     , m_factory(QUrl())
 {
-    // Common headers
     QHttpHeaders headers;
     headers.append(QHttpHeaders::WellKnownHeader::Accept, "application/json");
     headers.append(QHttpHeaders::WellKnownHeader::ContentType, "application/json");
     m_factory.setCommonHeaders(headers);
 
-    // Timeout
     m_factory.setTransferTimeout(std::chrono::seconds(15));
 }
 
@@ -24,13 +22,11 @@ HttpClient::HttpClient(const QUrl& baseUrl, QObject *parent)
     , m_rest(&m_nam, this)
     , m_factory(baseUrl)
 {
-    // Common headers
     QHttpHeaders headers;
     headers.append(QHttpHeaders::WellKnownHeader::Accept, "application/json");
     headers.append(QHttpHeaders::WellKnownHeader::ContentType, "application/json");
     m_factory.setCommonHeaders(headers);
 
-    // Timeout
     m_factory.setTransferTimeout(std::chrono::seconds(15));
 }
 
@@ -53,18 +49,15 @@ QNetworkRequest HttpClient::buildRequest(const QString& urlOrPath) const
 {
     const QUrl url(urlOrPath);
 
-    // 1) Relative path -> use factory join (baseUrl + path)
     if (url.isValid() && url.isRelative()) {
         return m_factory.createRequest(urlOrPath);
     }
 
-    // 2) Absolute URL -> create a "configured" request, then override URL
-    //    (keeps common headers, bearer, timeout, etc.)
     QNetworkRequest req = m_factory.createRequest();
     if (url.isValid())
         req.setUrl(url);
     else
-        req.setUrl(QUrl{}); // invalid; caller handles
+        req.setUrl(QUrl{});
     return req;
 }
 
@@ -92,7 +85,6 @@ bool HttpClient::shouldRetry(const QRestReply& reply, const RetryPolicy& policy,
 
     const int status = reply.httpStatus();
 
-    // Network/transport error (no valid HTTP status)
     if (status <= 0)
         return policy.retryOnNetworkError;
 

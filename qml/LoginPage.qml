@@ -8,8 +8,7 @@ Rectangle {
     id: root
     color: "#1a1a2e"
 
-    readonly property bool isBusy: AuthManager.state === AuthStateEnum.LoggingIn
-                                   || AuthManager.state === AuthStateEnum.AutoLoggingIn
+    readonly property bool isBusy: AuthManager.state === AuthStateEnum.LoggingIn || AuthManager.state === AuthStateEnum.AutoLoggingIn
     readonly property bool hasError: AuthManager.state === AuthStateEnum.Error
 
     ColumnLayout {
@@ -17,7 +16,6 @@ Rectangle {
         width: 360
         spacing: 16
 
-        // Title
         Text {
             text: "PoC Auth System"
             color: "#e0e0e0"
@@ -28,7 +26,6 @@ Rectangle {
             Layout.alignment: Qt.AlignHCenter
         }
 
-        // Subtitle
         Text {
             text: qsTr("Authentication Proof of Concept")
             color: "#888"
@@ -38,7 +35,6 @@ Rectangle {
 
         Item { Layout.preferredHeight: 12 }
 
-        // Auto-login message
         Text {
             text: qsTr("Restoring session...")
             color: "#888"
@@ -47,7 +43,6 @@ Rectangle {
             Layout.alignment: Qt.AlignHCenter
         }
 
-        // Username
         ColumnLayout {
             spacing: 4
             Layout.fillWidth: true
@@ -67,7 +62,6 @@ Rectangle {
             }
         }
 
-        // Password
         ColumnLayout {
             spacing: 4
             Layout.fillWidth: true
@@ -92,7 +86,6 @@ Rectangle {
             }
         }
 
-        // Error message
         Text {
             text: AuthManager.errorMessage
             color: "#e74c3c"
@@ -103,21 +96,16 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
         }
 
-        // Login button
         Button {
             id: loginButton
-            text: AuthManager.state === AuthStateEnum.LoggingIn
-                  ? qsTr("Logging in...") : qsTr("Login")
+            text: AuthManager.state === AuthStateEnum.LoggingIn ? qsTr("Logging in...") : qsTr("Login")
             Layout.fillWidth: true
             visible: AuthManager.state !== AuthStateEnum.AutoLoggingIn
-            enabled: !root.isBusy
-                     && usernameInput.text.length > 0
-                     && passwordInput.text.length > 0
+            enabled: !root.isBusy && usernameInput.text.length > 0 && passwordInput.text.length > 0
             onClicked: AuthManager.login(usernameInput.text, passwordInput.text)
         }
     }
 
-    // Clear fields on successful login
     Connections {
         target: AuthManager
         function onLoginSucceeded() {

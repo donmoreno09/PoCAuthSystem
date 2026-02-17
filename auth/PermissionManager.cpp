@@ -26,6 +26,7 @@ void PermissionManager::loadFromSession(const QStringList& roles, const QStringL
 {
     m_roles = QSet<QString>(roles.begin(), roles.end());
     m_permissions = QSet<QString>(permissions.begin(), permissions.end());
+    ++m_revision;
     emit permissionsChanged();
 }
 
@@ -33,5 +34,6 @@ void PermissionManager::clear()
 {
     m_roles.clear();
     m_permissions.clear();
+    ++m_revision;
     emit permissionsChanged();
 }

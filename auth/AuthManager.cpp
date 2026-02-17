@@ -3,6 +3,8 @@
 #include "PermissionManager.h"
 #include "networking/AuthApi.h"
 #include <QDebug>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 AuthManager::AuthManager(QObject* parent)
     : QObject(parent)
@@ -49,6 +51,7 @@ void AuthManager::login(const QString& username, const QString& password)
     }
 
     m_errorMessage.clear();
+    emit errorMessageChanged();
     setState(AuthState::LoggingIn);
 
     m_api->login(username, password,
@@ -58,9 +61,12 @@ void AuthManager::login(const QString& username, const QString& password)
             qDebug() << "[AuthManager] Login succeeded for" << m_session.username;
         },
         [this](const ErrorResult& err) {
-            qWarning() << "[AuthManager] Login failed:" << err.reply->readAll();
-            handleAuthError(err.reply->readAll());
-            emit loginFailed(err.reply->readAll());
+            const QByteArray raw = err.reply ? err.reply->readAll() : QByteArray{};
+            const QJsonObject obj = QJsonDocument::fromJson(raw).object();
+            const QString message = !obj["error"].toString().isEmpty() ? obj["error"].toString() : (!raw.isEmpty() ? QString::fromUtf8(raw) : err.message);
+            qWarning() << "[AuthManager] Login failed:" << message;
+            handleAuthError(message);
+            emit loginFailed(message);
         });
 }
 
@@ -112,8 +118,6 @@ void AuthManager::tryAutoLogin()
         });
 }
 
-// --- Private ---
-
 void AuthManager::setState(AuthState newState)
 {
     if (m_state == newState) return;
@@ -146,6 +150,7 @@ void AuthManager::handleLoginResult(const LoginResult& result)
 void AuthManager::handleAuthError(const QString& message)
 {
     m_errorMessage = message;
+    emit errorMessageChanged();
     setState(AuthState::Error);
 }
 
@@ -155,7 +160,6 @@ void AuthManager::scheduleTokenRefresh()
 
     if (m_tokens.expiresIn <= 0) return;
 
-    // Refresh 60 seconds before expiration, but at least 10 seconds from now
     int refreshInMs = qMax(10, m_tokens.expiresIn - 60) * 1000;
 
     qDebug() << "[AuthManager] Scheduling token refresh in" << refreshInMs / 1000 << "seconds";
@@ -175,8 +179,6 @@ void AuthManager::clearSession()
     emit tokenChanged(QByteArray{});
     emit userChanged();
 }
-
-// Property getters
 
 AuthState AuthManager::state() const { return m_state; }
 QString AuthManager::errorMessage() const { return m_errorMessage; }

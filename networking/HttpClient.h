@@ -15,15 +15,15 @@
 #include <functional>
 
 struct RetryPolicy {
-    int maxAttempts = 3; // 1 = no retry
+    int maxAttempts = 3;
     int baseDelayMs = 200;
     double multiplier = 2.0;
     int maxDelayMs = 5000;
 
-    bool retryOnNetworkError = true; // e.g. httpStatus <= 0
+    bool retryOnNetworkError = true;
     QList<int> retryHttpStatus = { 408, 429, 500, 502, 503, 504 };
 
-    std::function<bool(const QRestReply&)> shouldRetry = {}; // optional override
+    std::function<bool(const QRestReply&)> shouldRetry = {};
 };
 
 class RequestHandle : public QObject {
@@ -117,7 +117,7 @@ public:
                 if (!willRetry) {
                     emit networkError(reply.errorString(), reply.httpStatus());
                     emit handle->failed(reply.errorString(), reply.httpStatus());
-                    cb(reply); // invoke callback on failure
+                    cb(reply);
                     return;
                 }
 
@@ -231,7 +231,7 @@ private:
 
             emit networkError(reply.errorString(), reply.httpStatus());
             emit handle->failed(reply.errorString(), reply.httpStatus());
-            cb(reply); // invoke callback on failure
+            cb(reply);
         };
     }
 

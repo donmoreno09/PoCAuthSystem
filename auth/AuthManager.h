@@ -19,11 +19,9 @@ class AuthManager : public QObject
     QML_ELEMENT
     QML_SINGLETON
 
-    // App State
     Q_PROPERTY(AuthState state READ state NOTIFY stateChanged)
-    Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY stateChanged)
+    Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorMessageChanged)
 
-    // User State
     Q_PROPERTY(QString username READ username NOTIFY userChanged)
     Q_PROPERTY(QString displayName READ displayName NOTIFY userChanged)
     Q_PROPERTY(QString email READ email NOTIFY userChanged)
@@ -40,21 +38,19 @@ public:
     Q_INVOKABLE void logout();
     Q_INVOKABLE void tryAutoLogin();
 
-    // App State getters
     AuthState state() const;
     QString errorMessage() const;
 
-    // User State getters
     QString username() const;
     QString displayName() const;
     QString email() const;
     QStringList roles() const;
 
-    // For other C++ services
     QString accessToken() const;
 
 signals:
     void stateChanged();
+    void errorMessageChanged();
     void userChanged();
     void loginSucceeded();
     void loginFailed(const QString& error);
@@ -73,12 +69,10 @@ private:
     SecureTokenStorage* m_storage = nullptr;
     PermissionManager* m_permissions = nullptr;
 
-    // App State
     AuthState m_state = AuthState::Initializing;
     QString m_errorMessage;
     QTimer m_refreshTimer;
 
-    // User State
     UserSession m_session;
     AuthTokens m_tokens;
 };

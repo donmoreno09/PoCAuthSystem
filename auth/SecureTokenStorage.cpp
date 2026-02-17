@@ -5,7 +5,6 @@
 SecureTokenStorage::SecureTokenStorage(QObject* parent)
     : QObject(parent)
 {
-    // Uses org=IRIDESS, app=PoCAuthSystem (set in main.cpp via QCoreApplication)
 }
 
 void SecureTokenStorage::saveTokens(const AuthTokens& tokens)

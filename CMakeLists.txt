@@ -15,6 +15,7 @@ set(cpp_sources
     entities/IPersistable.h
     entities/AuthTokens.h
     entities/UserSession.h
+    entities/Item.h
 
     # Networking
     networking/ApiTypes.h
@@ -23,6 +24,8 @@ set(cpp_sources
     networking/BaseApi.h
     networking/AuthApi.h
     networking/AuthApi.cpp
+    networking/ItemApi.h
+    networking/ItemApi.cpp
     networking/ApiEndpoints.h
     networking/ApiEndpoints.cpp
 
@@ -34,6 +37,10 @@ set(cpp_sources
     auth/SecureTokenStorage.cpp
     auth/PermissionManager.h
     auth/PermissionManager.cpp
+
+    # Models
+    models/ItemModel.h
+    models/ItemModel.cpp
 )
 
 set(qml_files
@@ -56,6 +63,7 @@ target_include_directories(PoCAuthSystem
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/networking
         ${CMAKE_CURRENT_SOURCE_DIR}/auth
+        ${CMAKE_CURRENT_SOURCE_DIR}/models
 )
 
 target_link_libraries(PoCAuthSystem

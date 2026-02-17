@@ -9,6 +9,8 @@ namespace ApiEndpoints {
     QString AuthLogin();
     QString AuthRefresh();
     QString AuthLogout();
+
+    QString Items();
 }
 
 #endif // APIENDPOINTS_H
