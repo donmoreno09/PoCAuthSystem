@@ -124,7 +124,6 @@ ApplicationWindow {
 
             Rectangle { Layout.fillWidth: true; height: 1; color: "#333" }
 
-            // ── Items CRUD ──────────────────────────────────────────────
             Text {
                 text: "Items"
                 font.pointSize: 14
@@ -132,7 +131,6 @@ ApplicationWindow {
                 color: "#e0e0e0"
             }
 
-            // Error banner
             Rectangle {
                 Layout.fillWidth: true
                 height: 32
@@ -169,7 +167,7 @@ ApplicationWindow {
                         id: newName
                         placeholderText: "Name"
                         Layout.fillWidth: true
-                        color: "#e0e0e0"
+                        color: "black"
                     }
 
                     ComboBox {
@@ -217,7 +215,7 @@ ApplicationWindow {
 
                         Text {
                             text: name
-                            color: "#e0e0e0"
+                            color: "white"
                             font.pointSize: 10
                             Layout.fillWidth: true
                         }
@@ -236,22 +234,14 @@ ApplicationWindow {
                                 id: editName
                                 text: name
                                 implicitWidth: 120
-                                color: "#e0e0e0"
-                                font.pointSize: 9
-                            }
-
-                            ComboBox {
-                                id: editStatus
-                                model: ["active", "inactive", "maintenance"]
-                                currentIndex: model.indexOf(status)
-                                implicitWidth: 120
+                                color: "black"
                                 font.pointSize: 9
                             }
 
                             Button {
-                                text: "Save"
+                                text: "SAVE"
                                 enabled: !ItemModel.loading
-                                onClicked: ItemModel.update(id, editName.text.trim(), editStatus.currentText)
+                                onClicked: ItemModel.update(id, editName.text.trim())
                             }
                         }
 

@@ -23,7 +23,6 @@ public:
 
     void update(const QString& id,
                 const QString& name,
-                const QString& status,
                 std::function<void(const Item&)> successCb,
                 ErrorCb errorCb);
 

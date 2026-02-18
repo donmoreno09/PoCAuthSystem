@@ -42,6 +42,7 @@ QHash<int, QByteArray> ItemModel::roleNames() const
 void ItemModel::fetch()
 {
     if (!m_api) return;
+    qDebug().noquote() << "[ItemModel] fetch()";
     setLoading(true);
     setError({});
 
@@ -50,9 +51,10 @@ void ItemModel::fetch()
         m_items = QVector<Item>(items.begin(), items.end());
         endResetModel();
         setLoading(false);
+        qDebug().noquote() << "[ItemModel] fetch → loaded" << m_items.size() << "items";
         emit fetched();
     }, [this](const ErrorResult& err) {
-        qWarning() << "[ItemModel] fetch failed:" << err.message;
+        qWarning().noquote() << "[ItemModel] fetch → error:" << err.message;
         setLoading(false);
         setError(err.message);
     });
@@ -61,6 +63,7 @@ void ItemModel::fetch()
 void ItemModel::create(const QString& name, const QString& status)
 {
     if (!m_api) return;
+    qDebug().noquote() << "[ItemModel] create() name=" << name << "status=" << status;
     setLoading(true);
     setError({});
 
@@ -70,33 +73,38 @@ void ItemModel::create(const QString& name, const QString& status)
         m_items.append(item);
         endInsertRows();
         setLoading(false);
+        qDebug().noquote() << "[ItemModel] create → success  id=" << item.id
+                           << "row=" << row;
         emit created();
     }, [this](const ErrorResult& err) {
-        qWarning() << "[ItemModel] create failed:" << err.message;
+        qWarning().noquote() << "[ItemModel] create → error:" << err.message;
         setLoading(false);
         setError(err.message);
     });
 }
 
-void ItemModel::update(const QString& id, const QString& name, const QString& status)
+void ItemModel::update(const QString& id, const QString& name)
 {
     if (!m_api) return;
+    qDebug().noquote() << "[ItemModel] update() id=" << id << "name=" << name;
     setLoading(true);
     setError({});
 
-    m_api->update(id, name, status, [this, id](const Item& updated) {
+    m_api->update(id, name, [this, id](const Item& updated) {
         for (int i = 0; i < m_items.size(); ++i) {
             if (m_items[i].id == id) {
                 m_items[i] = updated;
                 const QModelIndex idx = index(i);
                 emit dataChanged(idx, idx);
+                qDebug().noquote() << "[ItemModel] update → success  id=" << id
+                                   << "row=" << i;
                 break;
             }
         }
         setLoading(false);
         emit this->updated();
     }, [this](const ErrorResult& err) {
-        qWarning() << "[ItemModel] update failed:" << err.message;
+        qWarning().noquote() << "[ItemModel] update → error:" << err.message;
         setLoading(false);
         setError(err.message);
     });
@@ -105,6 +113,7 @@ void ItemModel::update(const QString& id, const QString& name, const QString& st
 void ItemModel::remove(const QString& id)
 {
     if (!m_api) return;
+    qDebug().noquote() << "[ItemModel] remove() id=" << id;
     setLoading(true);
     setError({});
 
@@ -114,13 +123,15 @@ void ItemModel::remove(const QString& id)
                 beginRemoveRows({}, i, i);
                 m_items.removeAt(i);
                 endRemoveRows();
+                qDebug().noquote() << "[ItemModel] remove → success  id=" << id
+                                   << "row=" << i;
                 break;
             }
         }
         setLoading(false);
         emit removed();
     }, [this](const ErrorResult& err) {
-        qWarning() << "[ItemModel] remove failed:" << err.message;
+        qWarning().noquote() << "[ItemModel] remove → error:" << err.message;
         setLoading(false);
         setError(err.message);
     });

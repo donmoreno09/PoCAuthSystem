@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QDateTime>
 
 AuthManager::AuthManager(QObject* parent)
     : QObject(parent)
@@ -103,12 +104,30 @@ void AuthManager::tryAutoLogin()
         return;
     }
 
+    const qint64 expiresAt = m_storage->loadExpiresAt();
+    const qint64 now       = QDateTime::currentSecsSinceEpoch();
+    const qint64 margin    = 120;
+
+    if (expiresAt - now > margin) {
+        qDebug() << "[AuthManager] Access token still valid for" << (expiresAt - now) << "seconds, skipping refresh";
+
+        LoginResult result;
+        result.tokens = stored;
+        result.user   = m_storage->loadUserSession();
+
+        setState(AuthState::AutoLoggingIn);
+        handleLoginResult(result);
+        emit loginSucceeded();
+        return;
+    }
+
     setState(AuthState::AutoLoggingIn);
-    qDebug() << "[AuthManager] Attempting auto-login with stored token";
+    qDebug() << "[AuthManager] Access token expired or close to expiry, refreshing";
 
     m_api->refresh(stored.refreshToken,
         [this](const LoginResult& result) {
             handleLoginResult(result);
+            emit loginSucceeded();
             qDebug() << "[AuthManager] Auto-login succeeded for" << m_session.username;
         },
         [this](const ErrorResult& err) {
@@ -160,7 +179,7 @@ void AuthManager::scheduleTokenRefresh()
 
     if (m_tokens.expiresIn <= 0) return;
 
-    int refreshInMs = qMax(10, m_tokens.expiresIn - 60) * 1000;
+    int refreshInMs = qMax(10, m_tokens.expiresIn - 120) * 1000;
 
     qDebug() << "[AuthManager] Scheduling token refresh in" << refreshInMs / 1000 << "seconds";
     m_refreshTimer.start(refreshInMs);

@@ -36,7 +36,7 @@ public:
 
     Q_INVOKABLE void fetch();
     Q_INVOKABLE void create(const QString& name, const QString& status);
-    Q_INVOKABLE void update(const QString& id, const QString& name, const QString& status);
+    Q_INVOKABLE void update(const QString& id, const QString& name);
     Q_INVOKABLE void remove(const QString& id);
 
     bool loading() const;

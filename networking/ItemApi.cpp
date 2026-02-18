@@ -13,10 +13,15 @@ void ItemApi::fetchAll(std::function<void(const QList<Item>&)> successCb,
 {
     if (!ensureClient(errorCb)) return;
 
-    client()->get(ApiEndpoints::Items(), [
+    const QString url = ApiEndpoints::Items();
+    qDebug().noquote() << "[ItemApi] GET" << url;
+
+    client()->get(url, [
         successCb = std::move(successCb),
         errorCb   = std::move(errorCb)
     ](QRestReply& reply) mutable {
+        qDebug().noquote() << "[ItemApi] ←" << reply.httpStatus() << "GET /api/items";
+
         expectArray(reply, errorCb, [&](const QJsonArray& arr) {
             if (!successCb) return;
             QList<Item> items;
@@ -26,6 +31,7 @@ void ItemApi::fetchAll(std::function<void(const QList<Item>&)> successCb,
                 item.fromJson(val.toObject());
                 items.append(item);
             }
+            qDebug().noquote() << "[ItemApi] ← parsed" << items.size() << "items";
             successCb(items);
         });
     });
@@ -42,15 +48,24 @@ void ItemApi::create(const QString& name,
     body["name"]   = name;
     body["status"] = status;
 
-    client()->post(ApiEndpoints::Items(),
-                   QJsonDocument(body).toJson(QJsonDocument::Compact), [
+    const QByteArray payload = QJsonDocument(body).toJson(QJsonDocument::Compact);
+    const QString url = ApiEndpoints::Items();
+    qDebug().noquote() << "[ItemApi] POST" << url;
+    qDebug().noquote() << "[ItemApi] → body:" << payload;
+
+    client()->post(url, payload, [
         successCb = std::move(successCb),
         errorCb   = std::move(errorCb)
     ](QRestReply& reply) mutable {
+        qDebug().noquote() << "[ItemApi] ←" << reply.httpStatus() << "POST /api/items";
+
         expectObject(reply, errorCb, [&](const QJsonObject& obj) {
             if (!successCb) return;
             Item item;
             item.fromJson(obj);
+            qDebug().noquote() << "[ItemApi] ← created item id=" << item.id
+                               << "name=" << item.name
+                               << "status=" << item.status;
             successCb(item);
         });
     });
@@ -58,25 +73,32 @@ void ItemApi::create(const QString& name,
 
 void ItemApi::update(const QString& id,
                      const QString& name,
-                     const QString& status,
                      std::function<void(const Item&)> successCb,
                      ErrorCb errorCb)
 {
     if (!ensureClient(errorCb)) return;
 
     QJsonObject body;
-    body["name"]   = name;
-    body["status"] = status;
+    body["name"] = name;
 
-    client()->put(ApiEndpoints::Items() + "/" + id,
-                  QJsonDocument(body).toJson(QJsonDocument::Compact), [
+    const QByteArray payload = QJsonDocument(body).toJson(QJsonDocument::Compact);
+    const QString url = ApiEndpoints::Items() + "/" + id;
+    qDebug().noquote() << "[ItemApi] PUT" << url;
+    qDebug().noquote() << "[ItemApi] → body:" << payload;
+
+    client()->put(url, payload, [
         successCb = std::move(successCb),
         errorCb   = std::move(errorCb)
     ](QRestReply& reply) mutable {
+        qDebug().noquote() << "[ItemApi] ←" << reply.httpStatus() << "PUT /api/items/:id";
+
         expectObject(reply, errorCb, [&](const QJsonObject& obj) {
             if (!successCb) return;
             Item item;
             item.fromJson(obj);
+            qDebug().noquote() << "[ItemApi] ← updated item id=" << item.id
+                               << "name=" << item.name
+                               << "status=" << item.status;
             successCb(item);
         });
     });
@@ -88,10 +110,16 @@ void ItemApi::remove(const QString& id,
 {
     if (!ensureClient(errorCb)) return;
 
-    client()->remove(ApiEndpoints::Items() + "/" + id, [
+    const QString url = ApiEndpoints::Items() + "/" + id;
+    qDebug().noquote() << "[ItemApi] DELETE" << url;
+
+    client()->remove(url, [
+        id,
         successCb = std::move(successCb),
         errorCb   = std::move(errorCb)
     ](QRestReply& reply) mutable {
+        qDebug().noquote() << "[ItemApi] ←" << reply.httpStatus() << "DELETE /api/items/" + id;
+
         if (!reply.isSuccess()) {
             emitError(errorCb, fromReply(reply));
             return;

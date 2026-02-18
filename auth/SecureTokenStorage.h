@@ -22,6 +22,8 @@ public:
     void clearAll();
     bool hasStoredTokens() const;
 
+    qint64 loadExpiresAt() const;
+
 private:
     QSettings m_settings;
 };
